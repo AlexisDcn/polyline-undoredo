@@ -91,6 +91,15 @@ let polyline // La polyline en cours de construction;
 // Instance de UndoManager
 const undoManager = new UndoManager();
 
+// Fonction pour mettre à jour l'état des boutons undo/redo
+function updateButtonStates() {
+    const undoButton = document.getElementById("undo");
+    const redoButton = document.getElementById("redo");
+    
+    undoButton.disabled = !undoManager.canUndo();
+    redoButton.disabled = !undoManager.canRedo();
+}
+
 
 
 
@@ -197,6 +206,7 @@ const polylineMachine = createMachine(
                 // On sauvegarde la polyline dans la couche de dessin en utilisant le pattern Command et UndoManager
                 const command = new ConcreteCommand(polyline, dessin);
                 undoManager.executeCommand(command);
+                updateButtonStates();
             },
             addPoint: (context, event) => {
                 const pos = stage.getPointerPosition();
@@ -253,10 +263,15 @@ window.addEventListener("keydown", (event) => {
 const undoButton = document.getElementById("undo");
 undoButton.addEventListener("click", () => {
     undoManager.undo();
+    updateButtonStates();
 });
 
 // bouton Redo
 const redoButton = document.getElementById("redo");
 redoButton.addEventListener("click", () => {
     undoManager.redo();
+    updateButtonStates();
 });
+
+// Initialiser l'état des boutons au démarrage
+updateButtonStates();
