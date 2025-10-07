@@ -14,8 +14,18 @@
             <tr>
                 <td>
                     <div id="container"></div>
-                    <button id="undo">Undo</button>
-                    <button id="redo">Redo</button>
+                    <div style="margin: 10px 0;">
+                        <button id="undo">Undo</button>
+                        <button id="redo">Redo</button>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong>Changer couleur de la dernière polyline :</strong><br>
+                        <button id="color-red" style="background-color: red; color: white; margin: 2px; padding: 5px 10px;">Rouge</button>
+                        <button id="color-green" style="background-color: green; color: white; margin: 2px; padding: 5px 10px;">Vert</button>
+                        <button id="color-blue" style="background-color: blue; color: white; margin: 2px; padding: 5px 10px;">Bleu</button>
+                        <button id="color-yellow" style="background-color: yellow; color: black; margin: 2px; padding: 5px 10px;">Jaune</button>
+                    </div>
+                    <div id="selection-info" style="margin: 5px 0; font-style: italic; color: #666;"></div>
                     <div>
                         Notes:<br />
                         La commande qu'on veut pouvoir annuler est l'ajout d'une polyline au dessin.<br />

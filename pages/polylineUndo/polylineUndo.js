@@ -30,6 +30,26 @@ class ConcreteCommand extends Command {
     }
 }
 
+// Pattern Command : Classe concrète pour changer la couleur d'une polyline
+class ChangeColorCommand extends Command {
+    constructor(line, newColor) {
+        super();
+        this.line = line;
+        this.newColor = newColor;
+        this.oldColor = line.stroke(); // Sauvegarder l'ancienne couleur pour undo
+    }
+    
+    execute() {
+        this.line.stroke(this.newColor);
+        this.line.getLayer().batchDraw(); // Redessiner la couche
+    }
+    
+    undo() {
+        this.line.stroke(this.oldColor);
+        this.line.getLayer().batchDraw(); // Redessiner la couche
+    }
+}
+
 // Pattern Command : UndoManager utilisant Stack pour gérer undo/redo
 class UndoManager {
     constructor() {
@@ -87,6 +107,7 @@ stage.add(temporaire);
 
 const MAX_POINTS = 10;
 let polyline // La polyline en cours de construction;
+let lastSavedPolyline = null; // La dernière polyline sauvegardée
 
 // Instance de UndoManager
 const undoManager = new UndoManager();
@@ -98,6 +119,32 @@ function updateButtonStates() {
     
     undoButton.disabled = !undoManager.canUndo();
     redoButton.disabled = !undoManager.canRedo();
+}
+
+// Fonction pour mettre à jour l'état des boutons couleurs
+function updateColorButtonsState() {
+    const colorButtons = document.querySelectorAll('[id^="color-"]');
+    const hasPolyline = lastSavedPolyline !== null;
+    
+    colorButtons.forEach(button => {
+        button.disabled = !hasPolyline;
+    });
+    
+    const infoDiv = document.getElementById("selection-info");
+    if (infoDiv) {
+        infoDiv.textContent = hasPolyline ? 
+            "Dernière polyline disponible pour changement de couleur" : 
+            "Aucune polyline disponible";
+    }
+}
+
+// Fonction pour changer la couleur de la dernière polyline
+function changeLastPolylineColor(color) {
+    if (lastSavedPolyline) {
+        const command = new ChangeColorCommand(lastSavedPolyline, color);
+        undoManager.executeCommand(command);
+        updateButtonStates();
+    }
 }
 
 
@@ -206,7 +253,9 @@ const polylineMachine = createMachine(
                 // On sauvegarde la polyline dans la couche de dessin en utilisant le pattern Command et UndoManager
                 const command = new ConcreteCommand(polyline, dessin);
                 undoManager.executeCommand(command);
+                lastSavedPolyline = polyline; // Tracker la dernière polyline sauvegardée
                 updateButtonStates();
+                updateColorButtonsState();
             },
             addPoint: (context, event) => {
                 const pos = stage.getPointerPosition();
@@ -273,5 +322,23 @@ redoButton.addEventListener("click", () => {
     updateButtonStates();
 });
 
+// Boutons couleurs
+document.getElementById("color-red").addEventListener("click", () => {
+    changeLastPolylineColor("red");
+});
+
+document.getElementById("color-green").addEventListener("click", () => {
+    changeLastPolylineColor("green");
+});
+
+document.getElementById("color-blue").addEventListener("click", () => {
+    changeLastPolylineColor("blue");
+});
+
+document.getElementById("color-yellow").addEventListener("click", () => {
+    changeLastPolylineColor("yellow");
+});
+
 // Initialiser l'état des boutons au démarrage
 updateButtonStates();
+updateColorButtonsState();
